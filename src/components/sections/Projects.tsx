@@ -1,92 +1,62 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Github, ExternalLink, Clock, Award, Plane, HelpCircle, Users } from 'lucide-react';
-import { gsap } from '../../lib/gsap';
-import { PROJECTS, type Project } from '../../data/portfolio';
+import { Github, Clock, Award, Plane, HelpCircle, Users } from 'lucide-react';
+import VanillaTilt from 'vanilla-tilt';
+import { gsap, Flip, ScrollTrigger } from '../../lib/gsap';
+import { PROJECTS, type ProjectItem } from '../../data/portfolio';
 
-// Custom card component with mouse-tilt and glare effects
 interface CardProps {
-  project: Project;
+  project: ProjectItem;
   isMobile: boolean;
 }
 
 const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const glareRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  useEffect(() => {
     const card = cardRef.current;
     if (!card || isMobile) return;
-    
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const xc = rect.width / 2;
-    const yc = rect.height / 2;
-    
-    // Tilt intensities: max 8-10 degrees
-    const maxTilt = project.featured ? 6 : 10;
-    const rotateX = -((y - yc) / yc) * maxTilt;
-    const rotateY = ((x - xc) / xc) * maxTilt;
-    
-    gsap.to(card, {
-      rotateX,
-      rotateY,
-      scale: 1.015,
-      transformPerspective: 1000,
-      duration: 0.3,
-      ease: 'power2.out',
-      overwrite: 'auto'
-    });
-    
-    if (glareRef.current) {
-      glareRef.current.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.12) 0%, transparent 60%)`;
-      glareRef.current.style.opacity = '1';
-    }
-  };
 
-  const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (!card) return;
-    
-    gsap.to(card, {
-      rotateX: 0,
-      rotateY: 0,
-      scale: 1,
-      duration: 0.5,
-      ease: 'power2.out',
-      overwrite: 'auto'
-    });
-    
-    if (glareRef.current) {
-      glareRef.current.style.opacity = '0';
+    // Initialize vanilla-tilt (STEP 6)
+    if (project.id === 'neuromap') {
+      VanillaTilt.init(card, {
+        max: 8,
+        speed: 400,
+        glare: true,
+        "max-glare": 0.15,
+      });
+    } else {
+      VanillaTilt.init(card, {
+        max: 12,
+        speed: 300,
+      });
     }
-  };
 
-  // Render specific animated CSS mockups for each project (Section 11)
+    return () => {
+      if ((card as any).vanillaTilt) {
+        (card as any).vanillaTilt.destroy();
+      }
+    };
+  }, [isMobile, project.id]);
+
   const renderVisualMockup = (id: string) => {
     switch (id) {
       case 'neuromap': // SVG Animated node network
         return (
           <div className="w-full h-full relative flex items-center justify-center bg-bg-void/40 overflow-hidden min-h-[160px]">
-            {/* Pulsing connections grid background */}
             <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.015)_1px,transparent_1px)] [background-size:16px_16px]" />
             <svg viewBox="0 0 200 100" className="w-[85%] h-[85%] overflow-visible">
-              {/* Lines linking nodes */}
               <line x1="40" y1="50" x2="70" y2="30" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" className="animate-pulse" />
               <line x1="40" y1="50" x2="80" y2="70" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" />
               <line x1="70" y1="30" x2="110" y2="35" stroke="rgba(0, 212, 255, 0.4)" strokeWidth="1.5" />
               <line x1="80" y1="70" x2="120" y2="60" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" />
               <line x1="110" y1="35" x2="160" y2="50" stroke="rgba(0, 212, 255, 0.4)" strokeWidth="1.5" />
               <line x1="120" y1="60" x2="160" y2="50" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" />
-              <line x1="70" y1="30" x2="120" y2="60" stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="3 3" />
 
-              {/* Pulsing glow nodes */}
               <circle cx="40" cy="50" r="5" fill="#00d4ff" className="animate-ping" style={{ animationDuration: '3s' }} />
               <circle cx="40" cy="50" r="5" fill="#00d4ff" />
               
               <circle cx="70" cy="30" r="4.5" fill="#7c3aed" />
-              <circle cx="80" cy="70" r="4.5" fill="#a855f7" className="animate-pulse" />
+              <circle cx="80" cy="70" r="4.5" fill="#a855f7" />
               
               <circle cx="110" cy="35" r="5.5" fill="#00d4ff" />
               <circle cx="120" cy="60" r="4" fill="#7c3aed" />
@@ -97,16 +67,16 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
           </div>
         );
 
-      case 'queue-care': // Live updating clinic queue dashboard
+      case 'queue-care': // Live queue counter
         return <QueueCareMockup />;
 
-      case 'medcover': // AI Chat typing bubble simulation
+      case 'medcover': // AI Chat typing
         return <MedCoverMockup />;
 
-      case 'aptitude-system': // Quiz question screen with timer
+      case 'aptitude': // Countdown timer
         return <AptitudeMockup />;
 
-      case 'airline-system': // FID split-flap flight board
+      case 'airline': // Split-flap departure board
         return <AirlineMockup />;
 
       default:
@@ -121,36 +91,29 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
   return (
     <div
       ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className={`project-card glass-panel rounded-3xl overflow-hidden flex flex-col relative ${borderClass} ${
+      data-cursor="project"
+      className={`project-card glass-card overflow-hidden flex flex-col relative ${borderClass} ${
         project.featured ? 'col-span-1 lg:col-span-2' : 'col-span-1'
       }`}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      {/* Glare Sheet */}
-      <div 
-        ref={glareRef} 
-        className="glare absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 z-10" 
-      />
-
-      {/* Featured Award Banner (Section 11) */}
+      {/* Featured Award Banner (STEP 6) */}
       {project.featured && project.award && (
-        <div className="w-full py-2.5 px-6 bg-gradient-to-r from-neon-gold/15 via-neon-gold/5 to-transparent border-b border-neon-gold/30 text-neon-gold font-mono text-[10px] md:text-[11px] tracking-[0.1em] flex items-center gap-2 select-none relative overflow-hidden animate-shimmer-gold">
+        <div className="w-full py-2.5 px-6 bg-gradient-to-r from-neon-gold/15 via-neon-gold/5 to-transparent border-b border-neon-gold/30 text-neon-gold font-mono text-[10px] md:text-[11px] tracking-[0.1em] flex items-center gap-2 select-none relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" style={{ animation: 'shimmer 3s infinite' }} />
           <Award size={14} className="text-neon-gold animate-bounce" />
           <span>{project.award}</span>
         </div>
       )}
 
       {/* Graphic Preview */}
-      <div className="w-full border-b border-white/5 bg-bg-void/25 relative overflow-hidden" style={{ transform: 'translateZ(10px)' }}>
+      <div className="w-full border-b border-white/5 bg-bg-void/25 relative overflow-hidden" style={{ transform: 'translateZ(15px)' }}>
         {renderVisualMockup(project.id)}
       </div>
 
       {/* Info Content */}
-      <div className="p-6 md:p-8 flex flex-col flex-grow justify-between" style={{ transform: 'translateZ(20px)' }}>
+      <div className="p-6 md:p-8 flex flex-col flex-grow justify-between" style={{ transform: 'translateZ(30px)' }}>
         <div>
-          {/* Header titles */}
           <div className="flex flex-col mb-4">
             <h3 className="text-2xl font-display font-extrabold text-gradient">
               {project.title}
@@ -162,14 +125,12 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
             )}
           </div>
 
-          {/* Description */}
           <p className="text-sm md:text-base text-text-secondary leading-relaxed mb-6 font-body">
             {project.description}
           </p>
         </div>
 
         <div>
-          {/* Tech stack pills */}
           <div className="flex flex-wrap gap-2 mb-6">
             {project.tags.map((tag) => (
               <span
@@ -181,28 +142,17 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
             ))}
           </div>
 
-          {/* Action Links */}
           <div className="flex gap-4">
             {project.github && (
               <a
                 href={project.github}
                 target="_blank"
                 rel="noreferrer"
+                data-cursor="link"
                 className="px-4 py-2 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 text-text-primary text-xs font-mono flex items-center gap-2 cursor-none select-none transition-all active:scale-95"
               >
                 <Github size={14} />
                 GitHub
-              </a>
-            )}
-            {project.demo && (
-              <a
-                href={project.demo}
-                target="_blank"
-                rel="noreferrer"
-                className="px-4 py-2 rounded-lg bg-neon-blue text-bg-void font-display font-semibold text-xs flex items-center gap-2 cursor-none select-none transition-all hover:bg-neon-blue/80 active:scale-95 shadow-[0_0_15px_rgba(0,212,255,0.4)]"
-              >
-                <ExternalLink size={14} />
-                Live Demo
               </a>
             )}
           </div>
@@ -212,7 +162,7 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
   );
 };
 
-/* ── Queue Care Mockup ── */
+/* Queue Care Mockup */
 const QueueCareMockup: React.FC = () => {
   const [queueCount, setQueueCount] = useState(12);
 
@@ -229,7 +179,6 @@ const QueueCareMockup: React.FC = () => {
 
   return (
     <div className="w-full h-full min-h-[160px] p-4 flex flex-col justify-between font-mono bg-bg-void/40">
-      {/* Header Info */}
       <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-2">
         <span className="text-neon-blue flex items-center gap-1.5 font-bold">
           <span className="w-2 h-2 rounded-full bg-neon-green animate-ping" />
@@ -238,7 +187,6 @@ const QueueCareMockup: React.FC = () => {
         <span className="text-text-muted">WAITING TIME: ~15 MINS</span>
       </div>
 
-      {/* Main Counter Indicator */}
       <div className="flex items-center justify-center my-2 gap-4">
         <div className="text-center">
           <div className="text-3xl font-display font-bold text-gradient-gold">
@@ -253,7 +201,6 @@ const QueueCareMockup: React.FC = () => {
         </div>
       </div>
 
-      {/* Mini database table dashboard mockup */}
       <div className="flex flex-col gap-1 text-[9px]">
         <div className="flex justify-between items-center bg-neon-green/10 border-l-2 border-neon-green p-1 text-neon-green rounded-r">
           <span>Patient #103</span>
@@ -263,16 +210,12 @@ const QueueCareMockup: React.FC = () => {
           <span>Patient #104</span>
           <span className="font-semibold">CALLED</span>
         </div>
-        <div className="flex justify-between items-center bg-white/[0.02] border-l-2 border-white/10 p-1 text-text-secondary rounded-r">
-          <span>Patient #105</span>
-          <span className="font-semibold">WAITING</span>
-        </div>
       </div>
     </div>
   );
 };
 
-/* ── MedCover Chat Mockup ── */
+/* MedCover Chat Mockup */
 const MedCoverMockup: React.FC = () => {
   const [messages, setMessages] = useState<Array<{ sender: 'user' | 'ai'; text: string }>>([
     { sender: 'user', text: 'I have stomach ache and slight nausea.' }
@@ -291,14 +234,13 @@ const MedCoverMockup: React.FC = () => {
         setTyping(false);
         setMessages(prev => [
           ...prev,
-          { sender: 'ai', text: 'Based on your symptoms, I recommend drinking plenty of water and avoiding solid food for a few hours. Please consult a doctor if pain persists.' }
+          { sender: 'ai', text: 'Based on your symptoms, I recommend drinking plenty of water. Please consult a doctor if pain persists.' }
         ]);
-      }, 3000);
+      }, 3500);
 
-      // Loop restart
       timer2 = setTimeout(() => {
         runChatAnimation();
-      }, 7500);
+      }, 8000);
     };
 
     runChatAnimation();
@@ -311,13 +253,11 @@ const MedCoverMockup: React.FC = () => {
 
   return (
     <div className="w-full h-full min-h-[160px] p-4 flex flex-col justify-between font-mono bg-bg-void/40 text-[10px]">
-      {/* Header bar */}
       <div className="flex items-center gap-2 border-b border-white/5 pb-2 text-[10px] text-text-secondary">
         <Users size={12} className="text-neon-violet" />
         <span>SocioAI HEALTH ASSISTANT</span>
       </div>
 
-      {/* Messages area */}
       <div className="flex flex-col gap-2.5 my-2 flex-grow overflow-hidden max-h-[90px]">
         {messages.map((msg, idx) => (
           <div 
@@ -344,7 +284,7 @@ const MedCoverMockup: React.FC = () => {
   );
 };
 
-/* ── Aptitude Exam Mockup ── */
+/* Aptitude Exam Mockup */
 const AptitudeMockup: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState({ min: 14, sec: 32 });
 
@@ -364,7 +304,6 @@ const AptitudeMockup: React.FC = () => {
 
   return (
     <div className="w-full h-full min-h-[160px] p-4 flex flex-col justify-between font-mono bg-bg-void/40 text-[10px]">
-      {/* Exam Header */}
       <div className="flex justify-between items-center border-b border-white/5 pb-2 text-text-secondary text-[9px]">
         <span className="flex items-center gap-1.5">
           <HelpCircle size={12} className="text-neon-blue" />
@@ -376,7 +315,6 @@ const AptitudeMockup: React.FC = () => {
         </span>
       </div>
 
-      {/* Question Details */}
       <div className="flex flex-col gap-1 my-2">
         <span className="text-[9px] text-text-muted">QUESTION 3 OF 20</span>
         <p className="text-text-secondary leading-relaxed font-body text-[10px]">
@@ -384,9 +322,8 @@ const AptitudeMockup: React.FC = () => {
         </p>
       </div>
 
-      {/* Answer options */}
       <div className="grid grid-cols-2 gap-1.5">
-        <div className="border border-white/5 hover:border-neon-blue/30 bg-white/[0.01] p-1.5 rounded flex items-center gap-1 text-text-secondary select-none">
+        <div className="border border-white/5 bg-white/[0.01] p-1.5 rounded flex items-center gap-1 text-text-secondary select-none">
           <span className="w-3 h-3 rounded-full border border-white/20 flex items-center justify-center text-[7px]">A</span>
           <span>36</span>
         </div>
@@ -394,20 +331,12 @@ const AptitudeMockup: React.FC = () => {
           <span className="w-3 h-3 rounded-full bg-neon-blue text-bg-void flex items-center justify-center text-[7px] font-bold">B</span>
           <span>42 ✓</span>
         </div>
-        <div className="border border-white/5 hover:border-neon-blue/30 bg-white/[0.01] p-1.5 rounded flex items-center gap-1 text-text-secondary select-none">
-          <span className="w-3 h-3 rounded-full border border-white/20 flex items-center justify-center text-[7px]">C</span>
-          <span>48</span>
-        </div>
-        <div className="border border-white/5 hover:border-neon-blue/30 bg-white/[0.01] p-1.5 rounded flex items-center gap-1 text-text-secondary select-none">
-          <span className="w-3 h-3 rounded-full border border-white/20 flex items-center justify-center text-[7px]">D</span>
-          <span>56</span>
-        </div>
       </div>
     </div>
   );
 };
 
-/* ── Airline Reservation Split-Flap Mockup ── */
+/* Airline Reservation Mockup */
 const AirlineMockup: React.FC = () => {
   const flights = [
     { code: "AI 104", from: "MAA", to: "DEL", status: "ON TIME" },
@@ -417,7 +346,6 @@ const AirlineMockup: React.FC = () => {
 
   return (
     <div className="w-full h-full min-h-[160px] p-4 flex flex-col justify-between font-mono bg-[#0c0a05] text-[10px]">
-      {/* FID Header */}
       <div className="flex justify-between items-center border-b border-[#fbbf24]/20 pb-2 text-[#fbbf24] font-bold text-[9px]">
         <span className="flex items-center gap-1.5">
           <Plane size={12} className="animate-pulse" />
@@ -426,7 +354,6 @@ const AirlineMockup: React.FC = () => {
         <span>MAA TERMINAL 2</span>
       </div>
 
-      {/* Flight rows list */}
       <div className="flex flex-col gap-1.5 my-2">
         {flights.map((flight, idx) => (
           <div key={idx} className="grid grid-cols-4 items-center bg-[#1a1408] border border-[#fbbf24]/10 rounded p-1.5 text-text-primary text-[9px]">
@@ -445,10 +372,6 @@ const AirlineMockup: React.FC = () => {
           </div>
         ))}
       </div>
-      
-      <div className="w-full h-1 bg-[#1a1408] overflow-hidden rounded">
-        <div className="w-1/3 h-full bg-[#fbbf24] animate-ping" />
-      </div>
     </div>
   );
 };
@@ -459,20 +382,19 @@ export const Projects: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // 1. Check touch support
     const checkTouch = () => {
       setIsMobile(window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window));
     };
     checkTouch();
     window.addEventListener('resize', checkTouch);
 
-    // 2. GSAP cascade entering cards (Section 11)
+    // GSAP cascade entering (STEP 6)
     const ctx = gsap.context(() => {
       gsap.fromTo('.project-card',
         { y: 80, opacity: 0 },
         {
           scrollTrigger: {
-            trigger: '.projects-grid-container',
+            trigger: '.projects-grid',
             start: 'top 75%',
           },
           y: 0,
@@ -490,10 +412,29 @@ export const Projects: React.FC = () => {
     };
   }, []);
 
-  // Filter lists based on selection
+  const handleFilterChange = (newFilter: string) => {
+    // 1. Capture Layout Flip state
+    const cards = gsap.utils.toArray('.project-card') as Element[];
+    const state = Flip.getState(cards);
+
+    setFilter(newFilter);
+
+    // 2. Animate layout update (GSAP Flip Plugin, STEP 6)
+    setTimeout(() => {
+      Flip.from(state, {
+        duration: 0.6,
+        ease: 'power2.inOut',
+        absolute: true,
+        onComplete: () => {
+          ScrollTrigger.refresh();
+        }
+      });
+    }, 0);
+  };
+
   const filteredProjects = filter === 'All'
     ? PROJECTS
-    : PROJECTS.filter((p) => p.category === filter || p.tags.includes(filter));
+    : PROJECTS.filter((p) => p.category.includes(filter));
 
   return (
     <section 
@@ -508,18 +449,19 @@ export const Projects: React.FC = () => {
           <div className="font-mono text-xs text-neon-blue uppercase tracking-[0.2em] mb-2">
             04 // Creations
           </div>
-          <h2 className="text-4xl md:text-5xl font-display font-extrabold flex items-center gap-1">
+          <h2 className="text-4xl md:text-5xl font-display font-extrabold flex items-center gap-1 select-none">
             SELECTED PROJECTS
           </h2>
-          <div className="h-[2px] bg-neon-blue w-20 mt-3 rounded-full" />
+          <div className="h-[2px] bg-neon-blue w-20 mt-3 rounded-full shadow-[0_0_8px_#00d4ff]" />
         </div>
 
-        {/* Filter Toggle Buttons (Section 11) */}
+        {/* Filter bar toggles */}
         <div className="flex flex-wrap gap-3 mb-12">
           {['All', 'AI/ML', 'Full Stack', 'Real-time', 'Python'].map((cat) => (
             <button
               key={cat}
-              onClick={() => setFilter(cat)}
+              onClick={() => handleFilterChange(cat)}
+              data-cursor="link"
               className={`px-5 py-2.5 rounded-full font-mono text-xs cursor-none select-none transition-all duration-300 ${
                 filter === cat
                   ? 'bg-neon-blue text-bg-void shadow-[0_0_15px_rgba(0,212,255,0.5)] font-semibold border-neon-blue border'
@@ -531,17 +473,15 @@ export const Projects: React.FC = () => {
           ))}
         </div>
 
-        {/* Grid System container */}
-        <div className="projects-grid-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredProjects.map((project) => (
-              <ProjectCard 
-                key={project.id} 
-                project={project} 
-                isMobile={isMobile}
-              />
-            ))}
-          </div>
+        {/* Reordering Projects Grid */}
+        <div className="projects-grid grid grid-cols-1 md:grid-cols-2 gap-8">
+          {filteredProjects.map((project) => (
+            <ProjectCard 
+              key={project.id} 
+              project={project} 
+              isMobile={isMobile}
+            />
+          ))}
         </div>
 
       </div>

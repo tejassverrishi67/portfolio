@@ -1,14 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { Trophy, Code, Beaker, GraduationCap, Award, Zap, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { gsap } from '../../lib/gsap';
-import { ACHIEVEMENTS, PERSONAL_INFO } from '../../data/portfolio';
+import { ACHIEVEMENTS } from '../../data/portfolio';
+import { CounterUp } from '../ui/CounterUp';
+import { GlassCard } from '../ui/GlassCard';
 
 export const Awards: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 1. Title animations
+      // 1. Header fade
       gsap.fromTo('.awards-title-fade',
         { y: 30, opacity: 0 },
         {
@@ -24,7 +26,7 @@ export const Awards: React.FC = () => {
         }
       );
 
-      // 2. Cards stagger entrance
+      // 2. Cards entrance
       gsap.fromTo('.award-card-item',
         { y: 50, opacity: 0 },
         {
@@ -40,7 +42,7 @@ export const Awards: React.FC = () => {
         }
       );
 
-      // 3. LeetCode bar fills
+      // 3. Difficulty bar fills
       gsap.fromTo('.leetcode-bar-fill',
         { scaleX: 0, transformOrigin: 'left' },
         {
@@ -59,27 +61,6 @@ export const Awards: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  const getAwardIcon = (iconName: string) => {
-    const size = 32;
-    const className = "text-neon-gold group-hover:scale-110 transition-transform duration-300";
-    switch (iconName) {
-      case 'trophy':
-        return <Trophy size={size} className={className} />;
-      case 'code':
-        return <Code size={size} className={className} />;
-      case 'lab':
-        return <Beaker size={size} className={className} />;
-      case 'cap':
-        return <GraduationCap size={size} className={className} />;
-      case 'python':
-        return <Award size={size} className={className} />;
-      case 'lightning':
-        return <Zap size={size} className={className} />;
-      default:
-        return <Award size={size} className={className} />;
-    }
-  };
-
   return (
     <section 
       ref={containerRef}
@@ -89,7 +70,7 @@ export const Awards: React.FC = () => {
         background: 'radial-gradient(circle at center, rgba(251,191,36,0.025) 0%, transparent 70%)'
       }}
     >
-      {/* Large decorative "★" rotating in background */}
+      {/* Large rotating decorative star "★" (STEP 6) */}
       <div 
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-[30vw] md:text-[500px] text-white/[0.008] pointer-events-none select-none -z-10"
         style={{
@@ -107,27 +88,27 @@ export const Awards: React.FC = () => {
             05 // Recognition
           </div>
           <h2 className="awards-title-fade text-4xl md:text-5xl font-display font-extrabold select-none">
-            AWARDS & <span className="text-neon-gold [text-shadow:0_0_15px_rgba(251,191,36,0.4)]">ACHIEVEMENTS</span>
+            Awards & <span className="text-neon-gold [text-shadow:0_0_15px_rgba(251,191,36,0.4)]">Achievements</span>
           </h2>
           <div className="awards-title-fade h-[2px] bg-neon-gold w-20 mt-3 rounded-full shadow-[0_0_8px_#fbbf24]" />
         </div>
 
-        {/* 2-Column Spotlight Grid */}
+        {/* 2-Column Achievements Grid */}
         <div className="awards-grid-container grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          {ACHIEVEMENTS.map((item) => (
-            <div 
-              key={item.id}
-              className="award-card-item glass-panel group rounded-3xl p-6 md:p-8 flex gap-6 items-start relative overflow-hidden border border-white/5 select-none"
+          {ACHIEVEMENTS.map((item, index) => (
+            <GlassCard 
+              key={index}
+              className="award-card-item group rounded-3xl p-6 md:p-8 flex gap-6 items-start border border-white/5 relative overflow-hidden select-none hover:border-neon-gold/20"
             >
-              {/* Shimmer overlay effect on card hover (Section 12) */}
-              <div className="absolute inset-0 -translate-x-full group-hover:animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" />
+              {/* CSS pseudo sweep gold shimmer on hover (STEP 6) */}
+              <div className="absolute inset-0 -translate-x-full group-hover:animate-shimmer bg-gradient-to-r from-transparent via-neon-gold/5 to-transparent pointer-events-none" style={{ animation: 'shimmer 2.5s infinite' }} />
 
-              {/* Icon Panel container */}
-              <div className="p-4 bg-neon-gold/5 rounded-2xl border border-neon-gold/15 flex-shrink-0 flex items-center justify-center">
-                {getAwardIcon(item.icon)}
+              {/* 48px icon container */}
+              <div className="p-3.5 bg-neon-gold/5 rounded-2xl border border-neon-gold/15 flex-shrink-0 flex items-center justify-center font-display text-2xl font-bold w-14 h-14 text-neon-gold group-hover:scale-110 transition-transform duration-300">
+                {item.icon}
               </div>
 
-              {/* Text Area */}
+              {/* Card content text */}
               <div className="flex-grow flex flex-col justify-center">
                 <h3 className="font-display font-bold text-lg md:text-xl text-text-primary mb-1">
                   {item.title}
@@ -139,20 +120,23 @@ export const Awards: React.FC = () => {
                   {item.extra}
                 </p>
 
-                {/* Live LeetCode Stats Widget embedded inside Card 2 */}
-                {item.id === 'leetcode' && (
+                {/* Embedded LeetCode progress stats widget */}
+                {item.counter && (
                   <a 
-                    href={PERSONAL_INFO.leetcode}
+                    href={item.link}
                     target="_blank"
                     rel="noreferrer"
-                    className="leetcode-widget-trigger block w-full max-w-[340px] bg-bg-void/80 border border-white/10 rounded-2xl p-4 font-mono text-[10px] text-text-secondary select-none cursor-none hover:border-neon-blue/40 transition-colors"
+                    data-cursor="link"
+                    className="leetcode-widget-trigger block w-full max-w-[340px] bg-bg-void/80 border border-white/10 rounded-2xl p-4 font-mono text-[10px] text-text-secondary select-none cursor-none hover:border-neon-blue/40 transition-colors mt-2"
                   >
                     <div className="flex justify-between items-center text-[8px] text-text-muted mb-2.5 pb-1.5 border-b border-white/5">
                       <span>leetcode.com/tejassverrishi67</span>
                       <ExternalLink size={9} className="text-text-muted" />
                     </div>
 
-                    <span className="text-[11px] font-bold text-text-primary block mb-3">250+ Problems Solved</span>
+                    <span className="text-[11px] font-bold text-text-primary block mb-3">
+                      <CounterUp end={item.counterValue || 250} suffix="+" /> Problems Solved
+                    </span>
 
                     {/* Difficulty bars */}
                     <div className="flex flex-col gap-2">
@@ -160,10 +144,10 @@ export const Awards: React.FC = () => {
                       <div className="flex flex-col">
                         <div className="flex justify-between mb-1">
                           <span>Easy</span>
-                          <span className="text-[#00dd30]">80+</span>
+                          <span className="text-[#00dd30]"><CounterUp end={80} suffix="+" /></span>
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="leetcode-bar-fill h-full bg-[#00dd30] rounded-full" style={{ width: '35%' }} />
+                          <div className="leetcode-bar-fill h-full bg-[#00dd30] rounded-full" style={{ width: '35%', transformOrigin: 'left' }} />
                         </div>
                       </div>
 
@@ -171,10 +155,10 @@ export const Awards: React.FC = () => {
                       <div className="flex flex-col">
                         <div className="flex justify-between mb-1">
                           <span>Medium</span>
-                          <span className="text-[#ffb700]">150+</span>
+                          <span className="text-[#ffb700]"><CounterUp end={150} suffix="+" /></span>
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="leetcode-bar-fill h-full bg-[#ffb700] rounded-full" style={{ width: '60%' }} />
+                          <div className="leetcode-bar-fill h-full bg-[#ffb700] rounded-full" style={{ width: '60%', transformOrigin: 'left' }} />
                         </div>
                       </div>
 
@@ -182,17 +166,17 @@ export const Awards: React.FC = () => {
                       <div className="flex flex-col">
                         <div className="flex justify-between mb-1">
                           <span>Hard</span>
-                          <span className="text-[#ff2d55]">20+</span>
+                          <span className="text-[#ff2d55]"><CounterUp end={20} suffix="+" /></span>
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="leetcode-bar-fill h-full bg-[#ff2d55] rounded-full" style={{ width: '10%' }} />
+                          <div className="leetcode-bar-fill h-full bg-[#ff2d55] rounded-full" style={{ width: '10%', transformOrigin: 'left' }} />
                         </div>
                       </div>
                     </div>
                   </a>
                 )}
               </div>
-            </div>
+            </GlassCard>
           ))}
         </div>
 

@@ -7,35 +7,35 @@ export const ParticleUniverse: React.FC = () => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Detect mobile for optimization
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    // Detect mobile touch pointer for optimization
+    const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches || window.innerWidth < 768;
     
-    // Configurations from Section 6
     const CONFIG = {
       PARTICLE_COUNT: isMobile ? 60 : 180,
-      PARTICLE_SIZE: isMobile ? 0.8 : 1.2,
+      PARTICLE_SIZE: isMobile ? 1.0 : 1.5, // Attenuated size representation
       COLORS: [
-        new THREE.Color(0x00d4ff), // Neon blue
-        new THREE.Color(0x7c3aed), // Neon violet
-        new THREE.Color(0xa855f7), // Neon purple
-        new THREE.Color(0xf0abfc), // Neon pink
+        new THREE.Color('#00d4ff'),
+        new THREE.Color('#7c3aed'),
+        new THREE.Color('#a855f7'),
+        new THREE.Color('#f0abfc')
       ],
-      CONNECTION_MAX_DISTANCE: isMobile ? 80 : 110,
-      CONNECTION_OPACITY_FACTOR: 0.35,
-      SPEED_FACTOR: 0.2,
-      MOUSE_REPEL_RADIUS: 100,
-      MOUSE_REPEL_FORCE: 0.45,
+      CONNECTION_MAX_DISTANCE: 120, // Connection threshold < 120px
+      MOUSE_REPEL_RADIUS: 80, // Repel radius 80px
+      MOUSE_REPEL_FORCE: 0.5,
+      SPEED_FACTOR: 0.15,
+      FOV: 75,
+      CAMERA_Z: 300
     };
 
     // 1. Setup Scene, Camera, Renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      75, 
+      CONFIG.FOV, 
       window.innerWidth / window.innerHeight, 
       0.1, 
       1000
     );
-    camera.position.z = 250;
+    camera.position.z = CONFIG.CAMERA_Z;
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -60,6 +60,7 @@ export const ParticleUniverse: React.FC = () => {
     const colors = new Float32Array(CONFIG.PARTICLE_COUNT * 3);
 
     for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
+      // Setup coordinates within camera viewing frustum box
       const x = (Math.random() - 0.5) * 500;
       const y = (Math.random() - 0.5) * 500;
       const z = (Math.random() - 0.5) * 300;
@@ -89,14 +90,13 @@ export const ParticleUniverse: React.FC = () => {
       colors[i * 3 + 2] = color.b;
     }
 
-    // Create Points Geometry
     const particleGeometry = new THREE.BufferGeometry();
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Create custom soft circular particle textures using HTML canvas
+    // Circular glowing particle texture
     const createCircleTexture = () => {
-      const size = 32;
+      const size = 16;
       const canvas = document.createElement('canvas');
       canvas.width = size;
       canvas.height = size;
@@ -126,7 +126,6 @@ export const ParticleUniverse: React.FC = () => {
     scene.add(particlePoints);
 
     // 3. Setup Connection Lines
-    // Maximum possible connections is N * (N-1) / 2, each has 2 points (X,Y,Z * 2 = 6 floats)
     const maxLineCount = CONFIG.PARTICLE_COUNT * 8; 
     const linePositions = new Float32Array(maxLineCount * 2 * 3);
     const lineColors = new Float32Array(maxLineCount * 2 * 3);
@@ -138,7 +137,7 @@ export const ParticleUniverse: React.FC = () => {
     const lineMaterial = new THREE.LineBasicMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.5,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -146,7 +145,7 @@ export const ParticleUniverse: React.FC = () => {
     const connectionLines = new THREE.LineSegments(lineGeometry, lineMaterial);
     scene.add(connectionLines);
 
-    // 4. Mouse Tracking & Raycasting
+    // 4. Mouse interaction
     const mouse = new THREE.Vector2(-9999, -9999);
     const targetMouse = new THREE.Vector2(-9999, -9999);
     const mouse3D = new THREE.Vector3();
@@ -156,22 +155,26 @@ export const ParticleUniverse: React.FC = () => {
       targetMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        targetMouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-        targetMouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
-      }
-    };
-
     const handleMouseLeave = () => {
       targetMouse.set(-9999, -9999);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
     document.addEventListener('mouseleave', handleMouseLeave);
 
-    // Konami code interaction states (Section 19)
+    // 5. Scroll depth rotation
+    let scrollY = window.scrollY;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+    
+    const handleScroll = () => {
+      scrollY = window.scrollY;
+      targetRotationX = scrollY * 0.0006;
+      targetRotationY = scrollY * 0.0004;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Konami codes (Easter Egg 1)
     let isKonamiActive = false;
     
     const handleKonamiTrigger = () => {
@@ -196,19 +199,7 @@ export const ParticleUniverse: React.FC = () => {
     window.addEventListener('konami-trigger', handleKonamiTrigger as EventListener);
     window.addEventListener('konami-reset', handleKonamiReset as EventListener);
 
-    // 5. Scroll Interaction variables
-    let scrollY = window.scrollY;
-    let targetRotationX = 0;
-    let targetRotationY = 0;
-    
-    const handleScroll = () => {
-      scrollY = window.scrollY;
-      targetRotationX = scrollY * 0.0006;
-      targetRotationY = scrollY * 0.0004;
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // 6. Animation Loop
+    // 6. Loop animation
     let time = 0;
     let animFrameId: number;
 
@@ -221,7 +212,6 @@ export const ParticleUniverse: React.FC = () => {
 
       // Project mouse coordinates to 3D space at Z depth
       if (mouse.x > -100) {
-        // Map normalized coordinates back to 3D world space
         const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
         vector.unproject(camera);
         const dir = vector.sub(camera.position).normalize();
@@ -231,7 +221,7 @@ export const ParticleUniverse: React.FC = () => {
         mouse3D.set(-9999, -9999, -9999);
       }
 
-      // Smooth scroll rotation
+      // Smooth scroll rotation (Performance Rule #3: scroll handled dynamically in requestAnimationFrame)
       particlePoints.rotation.x += (targetRotationX - particlePoints.rotation.x) * 0.05;
       particlePoints.rotation.y += (targetRotationY - particlePoints.rotation.y) * 0.05;
       connectionLines.rotation.copy(particlePoints.rotation);
@@ -243,33 +233,31 @@ export const ParticleUniverse: React.FC = () => {
       const linePosAttr = lineGeometry.getAttribute('position') as THREE.BufferAttribute;
       const lineColorAttr = lineGeometry.getAttribute('color') as THREE.BufferAttribute;
 
-      // Update particle positions
+      // Move particles
       for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
         const data = particlesData[i];
 
-        // 1. Lissajous drift animation + velocity
-        const driftX = Math.sin(time * data.speed + data.timeOffset) * 0.1;
-        const driftY = Math.cos(time * data.speed * 0.8 + data.timeOffset) * 0.1;
+        // Lissajous Lissajous-like drift paths
+        const driftX = Math.sin(time * data.speed + data.timeOffset) * 0.15;
+        const driftY = Math.cos(time * data.speed * 0.8 + data.timeOffset) * 0.15;
         
         data.position.x += data.velocity.x + driftX;
         data.position.y += data.velocity.y + driftY;
         data.position.z += data.velocity.z;
 
-        // Boundary checks (warp around bounding box)
+        // Bounding wraps
         const boxSize = 250;
         if (Math.abs(data.position.x) > boxSize) data.position.x = -Math.sign(data.position.x) * boxSize;
         if (Math.abs(data.position.y) > boxSize) data.position.y = -Math.sign(data.position.y) * boxSize;
         if (Math.abs(data.position.z) > 150) data.position.z = -Math.sign(data.position.z) * 150;
 
-        // 2. Mouse Repel Logic
+        // Mouse Repel Logic
         if (mouse3D.x > -9000) {
-          // Adjust for particle container rotation to align mouse repel correctly
           const pLocal = data.position.clone().applyEuler(particlePoints.rotation);
           const dist = pLocal.distanceTo(mouse3D);
 
           if (dist < CONFIG.MOUSE_REPEL_RADIUS) {
             const forceDir = pLocal.clone().sub(mouse3D).normalize();
-            // Calculate force scaling with distance
             const force = (1.0 - dist / CONFIG.MOUSE_REPEL_RADIUS) * CONFIG.MOUSE_REPEL_FORCE;
             const forceLocal = forceDir.multiplyScalar(force).applyQuaternion(particlePoints.quaternion.clone().invert());
             
@@ -277,11 +265,10 @@ export const ParticleUniverse: React.FC = () => {
           }
         }
 
-
-        // Color shifting subtly (HSL rotation) or override with red for Konami
+        // Subtly shift colors
         let shiftingColor = data.color.clone();
         if (isKonamiActive) {
-          shiftingColor.setRGB(1.0, 0.1, 0.1); // Bright red particles
+          shiftingColor.setRGB(1.0, 0.1, 0.1);
         } else {
           const hueShift = (time * 0.05 + data.timeOffset * 0.01) % 1;
           const hsl = { h: 0, s: 0, l: 0 };
@@ -289,31 +276,26 @@ export const ParticleUniverse: React.FC = () => {
           shiftingColor.setHSL((hsl.h + hueShift * 0.1) % 1, hsl.s, hsl.l);
         }
 
-        // Update buffers
         positionsAttr.setXYZ(i, data.position.x, data.position.y, data.position.z);
         colorsAttr.setXYZ(i, shiftingColor.r, shiftingColor.g, shiftingColor.b);
       }
 
-      // Generate Connection Lines
+      // Draw connection lines
       for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
         const p1 = particlesData[i];
 
         for (let j = i + 1; j < CONFIG.PARTICLE_COUNT; j++) {
           const p2 = particlesData[j];
           const dist = p1.position.distanceTo(p2.position);
-          const maxDist = isKonamiActive ? CONFIG.CONNECTION_MAX_DISTANCE * 1.5 : CONFIG.CONNECTION_MAX_DISTANCE;
+          const maxDist = CONFIG.CONNECTION_MAX_DISTANCE;
 
           if (dist < maxDist && lineIndex < maxLineCount) {
-            const alpha = (1.0 - dist / maxDist) * CONFIG.CONNECTION_OPACITY_FACTOR;
-            
-            // Pulse connection opacity gently
+            const alpha = (1.0 - dist / maxDist) * 0.5; // (opacity = 1 - dist/120) * scale
             const pulsingAlpha = alpha * (0.7 + Math.sin(time * 2 + p1.timeOffset) * 0.3);
 
-            // Line endpoints positions
             linePosAttr.setXYZ(lineIndex * 2, p1.position.x, p1.position.y, p1.position.z);
             linePosAttr.setXYZ(lineIndex * 2 + 1, p2.position.x, p2.position.y, p2.position.z);
 
-            // Easing line color (red for Konami)
             const c1 = p1.color.clone();
             const c2 = p2.color.clone();
             if (isKonamiActive) {
@@ -332,8 +314,6 @@ export const ParticleUniverse: React.FC = () => {
         }
       }
 
-
-      // Set index attributes count and mark updates
       lineGeometry.setDrawRange(0, lineIndex * 2);
       
       positionsAttr.needsUpdate = true;
@@ -347,16 +327,20 @@ export const ParticleUniverse: React.FC = () => {
 
     animFrameId = requestAnimationFrame(animate);
 
-    // 7. Resize Handler
+    // 7. Debounced Resize Handler (Performance Rule #2)
+    let resizeTimeout: number;
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(() => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }, 200);
     };
     window.addEventListener('resize', handleResize);
 
-    // 8. Tab visibility throttle (Performance Trick #1)
-    const handleVisibilityChange = () => {
+    // 8. Tab Visibility Throttler (Performance Rule #1)
+    const handleVisibility = () => {
       if (document.hidden) {
         cancelAnimationFrame(animFrameId);
       } else {
@@ -364,22 +348,20 @@ export const ParticleUniverse: React.FC = () => {
         animFrameId = requestAnimationFrame(animate);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibility);
 
-    // Clean up
+    // Cleanup logic
     return () => {
       cancelAnimationFrame(animFrameId);
+      clearTimeout(resizeTimeout);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('konami-trigger', handleKonamiTrigger as EventListener);
       window.removeEventListener('konami-reset', handleKonamiReset as EventListener);
-
       
-      // Dispose materials/geometry to prevent leaks
       particleGeometry.dispose();
       particleMaterial.dispose();
       lineGeometry.dispose();

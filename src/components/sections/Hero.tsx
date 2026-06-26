@@ -1,93 +1,61 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, FileText } from 'lucide-react';
+import Typed from 'typed.js';
 import { gsap } from '../../lib/gsap';
 import { scrollTo } from '../../lib/lenis';
-
-// Custom typewriter component
-const Typewriter: React.FC = () => {
-  const words = [
-    "AI-powered experiences",
-    "real-time web applications",
-    "award-winning interfaces",
-    "solutions that matter",
-    "250+ LeetCode solutions"
-  ];
-  const [currentWordIdx, setCurrentWordIdx] = useState(0);
-  const [currentText, setCurrentText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    let timer: number;
-    const fullText = words[currentWordIdx];
-    const typingSpeed = isDeleting ? 30 : 60;
-
-    if (!isDeleting && currentText === fullText) {
-      // Pause at full text
-      timer = setTimeout(() => setIsDeleting(true), 2000);
-    } else if (isDeleting && currentText === '') {
-      setIsDeleting(false);
-      setCurrentWordIdx((prev) => (prev + 1) % words.length);
-    } else {
-      timer = setTimeout(() => {
-        setCurrentText((prev) =>
-          isDeleting
-            ? prev.substring(0, prev.length - 1)
-            : fullText.substring(0, prev.length + 1)
-        );
-      }, typingSpeed);
-    }
-
-    return () => clearTimeout(timer);
-  }, [currentText, isDeleting, currentWordIdx]);
-
-  return (
-    <span className="font-mono text-neon-blue font-semibold min-h-[1.5em] inline-block">
-      {currentText}
-      <span className="animate-blink font-light">|</span>
-    </span>
-  );
-};
+import { PERSONAL, TYPEWRITER_STRINGS } from '../../data/portfolio';
+import { MagneticButton } from '../ui/MagneticButton';
 
 export const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const title1Ref = useRef<HTMLDivElement>(null);
   const title2Ref = useRef<HTMLDivElement>(null);
-  const btn1Ref = useRef<HTMLButtonElement>(null);
-  const btn2Ref = useRef<HTMLAnchorElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const typedSpanRef = useRef<HTMLSpanElement>(null);
+  
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const clickCountRef = useRef(0);
+  const [showEmoji, setShowEmoji] = useState(false);
 
-  // Setup Name letter arrays
   const firstName = "TEJASSVER".split("");
   const lastName = "RISHI S".split("");
 
   useEffect(() => {
-    // 1. Scroll listener to hide indicator
+    // 1. Hide scroll indicator after 100px scroll
     const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setShowScrollIndicator(false);
-      } else {
-        setShowScrollIndicator(true);
-      }
+      setShowScrollIndicator(window.scrollY < 100);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // 2. Letters drop-in from top on mount
+    // 2. Setup typed.js typewriter
+    let typed: Typed | null = null;
+    if (typedSpanRef.current) {
+      typed = new Typed(typedSpanRef.current, {
+        strings: TYPEWRITER_STRINGS,
+        typeSpeed: 60,
+        backSpeed: 30,
+        backDelay: 2000,
+        loop: true,
+        showCursor: true,
+        cursorChar: '|',
+      });
+    }
+
+    // 3. Stagger drop-in letters animation
     const ctx = gsap.context(() => {
       const letters = document.querySelectorAll('.hero-letter');
       gsap.fromTo(letters, 
-        { y: -80, opacity: 0 },
+        { y: -60, opacity: 0 },
         { 
           y: 0, 
           opacity: 1, 
           duration: 0.8, 
-          stagger: 0.03, 
+          stagger: 0.02, 
           ease: 'power3.out',
           onComplete: () => {
-            // Apply subtle floating animation once settled
+            // Apply float loop y +/-4px (4s loop) after settling
             gsap.to('.hero-title-container', {
-              y: -5,
-              duration: 3,
+              y: -4,
+              duration: 2,
               repeat: -1,
               yoyo: true,
               ease: 'power1.inOut'
@@ -97,61 +65,24 @@ export const Hero: React.FC = () => {
       );
 
       // Slide up badge, typewriter, bio, buttons
-      gsap.from('.hero-fade-in', {
-        y: 40,
+      gsap.from('.hero-fade-item', {
+        y: 35,
         opacity: 0,
-        duration: 1,
-        stagger: 0.15,
+        duration: 0.8,
+        stagger: 0.12,
         ease: 'power3.out',
-        delay: 0.4
+        delay: 0.3
       });
     }, containerRef);
-
-    // 3. Magnetic button animations
-    const setupMagnetic = (el: HTMLElement | null) => {
-      if (!el) return;
-      const onMouseMove = (e: MouseEvent) => {
-        const rect = el.getBoundingClientRect();
-        const dx = e.clientX - (rect.left + rect.width / 2);
-        const dy = e.clientY - (rect.top + rect.height / 2);
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < 80) {
-          gsap.to(el, { x: dx * 0.35, y: dy * 0.35, scale: 1.02, duration: 0.3, ease: 'power2.out' });
-        } else {
-          gsap.to(el, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
-        }
-      };
-      
-      const onMouseLeave = () => {
-        gsap.to(el, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
-      };
-
-      window.addEventListener('mousemove', onMouseMove);
-      el.addEventListener('mouseleave', onMouseLeave);
-
-      return () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        el.removeEventListener('mouseleave', onMouseLeave);
-      };
-    };
-
-    const cleanupMagnetic1 = setupMagnetic(btn1Ref.current);
-    const cleanupMagnetic2 = setupMagnetic(btn2Ref.current);
 
     return () => {
       ctx.revert();
       window.removeEventListener('scroll', handleScroll);
-      if (cleanupMagnetic1) cleanupMagnetic1();
-      if (cleanupMagnetic2) cleanupMagnetic2();
+      if (typed) typed.destroy();
     };
   }, []);
 
-  const clickCountRef = useRef(0);
-  const [showEmoji, setShowEmoji] = useState(false);
-
-
-  // Glitch effect on letter hover
+  // Letters hover glitch effect
   const handleLetterHover = (e: React.MouseEvent<HTMLSpanElement>) => {
     const el = e.currentTarget;
     gsap.timeline()
@@ -184,7 +115,7 @@ export const Hero: React.FC = () => {
   const handleNameClick = () => {
     clickCountRef.current += 1;
     if (clickCountRef.current >= 5) {
-      // Scatter name letters
+      // Scatter name letters (GSAP physics)
       const letters = document.querySelectorAll('.hero-letter');
       gsap.to(letters, {
         x: () => (Math.random() - 0.5) * 800,
@@ -197,7 +128,7 @@ export const Hero: React.FC = () => {
 
       setShowEmoji(true);
 
-      // Snap letters back and hide emoji
+      // Snap back letters
       gsap.to(letters, {
         x: 0,
         y: 0,
@@ -211,10 +142,9 @@ export const Hero: React.FC = () => {
         }
       });
 
-      clickCountRef.current = 0; // Reset counter
+      clickCountRef.current = 0;
     }
   };
-
 
   return (
     <section 
@@ -222,7 +152,16 @@ export const Hero: React.FC = () => {
       id="hero"
       className="relative min-h-screen w-full flex flex-col justify-center items-center px-6 md:px-12 overflow-hidden py-24 select-none"
     >
-      {/* Easter Egg 2 Smile emoji display */}
+      {/* Decorative Orbs (drifting CSS grads) */}
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-neon-violet/10 blur-[130px] top-[15%] left-[10%] animate-pulse duration-[10s] pointer-events-none -z-10" />
+      <div className="absolute w-[400px] h-[400px] rounded-full bg-neon-blue/8 blur-[110px] bottom-[15%] right-[10%] pointer-events-none -z-10" />
+
+      {/* Decorative background "01" (JetBrains Mono 400px) */}
+      <div className="absolute right-[5%] top-[10%] font-mono text-[25vw] md:text-[400px] font-bold text-white/[0.015] pointer-events-none select-none -z-10">
+        01
+      </div>
+
+      {/* Easter Egg 2 smile emoji */}
       <div 
         className={`absolute font-display text-8xl md:text-9xl pointer-events-none select-none z-30 transition-all duration-300 transform ${
           showEmoji ? 'opacity-100 scale-100 rotate-12' : 'opacity-0 scale-0 pointer-events-none'
@@ -231,19 +170,10 @@ export const Hero: React.FC = () => {
         😄
       </div>
 
-      {/* Decorative Orbs (radial gradients, blurred, drifting) */}
-      <div className="absolute w-[600px] h-[600px] rounded-full bg-neon-violet/10 blur-[120px] top-10 left-10 animate-pulse pointer-events-none duration-[8000ms] -z-10" />
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-neon-blue/8 blur-[100px] bottom-10 right-10 pointer-events-none -z-10" />
-
-      {/* Decorative background "01" */}
-      <div className="absolute right-[5%] top-[10%] font-mono text-[25vw] md:text-[350px] font-bold text-white/[0.015] pointer-events-none select-none -z-10 select-none">
-        01
-      </div>
-
       <div className="max-w-[1000px] flex flex-col items-center text-center">
         
         {/* Availability Badge */}
-        <div className="hero-fade-in mb-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-[10px] text-xs font-mono text-text-secondary select-none">
+        <div className="hero-fade-item mb-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-[10px] text-xs font-mono text-text-secondary select-none">
           <span className="pulse-dot" />
           <span>✦ Available for Opportunities</span>
         </div>
@@ -251,9 +181,10 @@ export const Hero: React.FC = () => {
         {/* The Massive Title Name (Section 8) */}
         <div 
           onClick={handleNameClick}
-          className="hero-title-container flex flex-col items-center leading-[0.9] tracking-tighter mb-6 cursor-none"
+          data-cursor="link"
+          className="hero-title-container flex flex-col items-center leading-[0.9] tracking-tighter mb-6"
         >
-          <div ref={title1Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[128px] font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">
+          <div ref={title1Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">
             {firstName.map((letter, i) => (
               <span 
                 key={i} 
@@ -264,7 +195,7 @@ export const Hero: React.FC = () => {
               </span>
             ))}
           </div>
-          <div ref={title2Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[128px] font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">
+          <div ref={title2Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">
             {lastName.map((letter, i) => (
               <span 
                 key={i} 
@@ -278,43 +209,41 @@ export const Hero: React.FC = () => {
           </div>
         </div>
 
-
         {/* Typewriter */}
-        <div className="hero-fade-in text-lg sm:text-xl md:text-2xl font-mono text-text-secondary mb-4 select-none">
-          I build <Typewriter />
+        <div className="hero-fade-item text-lg sm:text-xl md:text-2xl font-mono text-text-secondary mb-4 select-none">
+          I build <span ref={typedSpanRef} className="text-neon-blue font-semibold" />
         </div>
 
         {/* Bio text */}
-        <p className="hero-fade-in max-w-xl text-base sm:text-lg text-text-secondary mb-10 leading-relaxed font-body">
-          CSE student at Chennai Institute of Technology crafting the future of web design, one line at a time.
+        <p className="hero-fade-item max-w-xl text-base sm:text-lg text-text-secondary mb-10 leading-relaxed font-body">
+          {PERSONAL.college} student crafting the future, one line at a time.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="hero-fade-in flex flex-col sm:flex-row gap-5 justify-center items-center z-10 w-full sm:w-auto">
-          <button
-            ref={btn1Ref}
+        {/* CTA Buttons (MagneticButtons) */}
+        <div className="hero-fade-item flex flex-col sm:flex-row gap-5 justify-center items-center z-10 w-full sm:w-auto">
+          <MagneticButton
             onClick={() => scrollTo('#projects')}
+            data-cursor="link"
             className="w-full sm:w-auto px-8 py-4 rounded-lg bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink text-white font-display font-medium text-base shadow-[var(--glow-blue)] hover:brightness-110 cursor-none transition-all active:scale-95 select-none"
           >
             View My Work ↓
-          </button>
+          </MagneticButton>
           
-          <a
-            ref={btn2Ref}
-            href="/resume.pdf"
-            download
+          <MagneticButton
+            onClick={() => window.open('/resume.pdf')}
+            data-cursor="link"
             className="w-full sm:w-auto px-8 py-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-text-primary font-display font-medium text-base flex items-center justify-center gap-2 cursor-none transition-all active:scale-95 select-none"
           >
             <FileText size={18} />
             Download Resume
-          </a>
+          </MagneticButton>
         </div>
       </div>
 
       {/* Scroll Indicator */}
       <div 
-        ref={scrollIndicatorRef}
         onClick={() => scrollTo('#about')}
+        data-cursor="link"
         className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-none transition-all duration-500 z-10 ${
           showScrollIndicator ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
@@ -324,16 +253,6 @@ export const Hero: React.FC = () => {
           <ChevronDown size={20} />
         </div>
       </div>
-
-      <style>{`
-        .animate-blink {
-          animation: cursor-blink 530ms step-end infinite;
-        }
-        @keyframes cursor-blink {
-          from, to { color: transparent }
-          50% { color: var(--color-neon-blue) }
-        }
-      `}</style>
     </section>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { gsap } from 'gsap';
+import { gsap } from '../../lib/gsap';
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -9,8 +9,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   const [loadingText, setLoadingText] = useState('INITIALIZING...');
 
   useEffect(() => {
-    // 1. Text cycle effect
-    const textInterval = setTimeout(() => {
+    // Labels cycle (Section 4)
+    const textInterval1 = setTimeout(() => {
       setLoadingText('LOADING PORTFOLIO...');
     }, 1000);
 
@@ -18,51 +18,50 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       setLoadingText('COMPILING EXPERIENCES...');
     }, 1800);
 
-    // 2. Timeline Animation Sequence (Section 4)
     const tl = gsap.timeline({
       onComplete: () => {
         onComplete();
       }
     });
 
-    // Initial state
+    // Initial setup
     gsap.set('.stroke-T', { strokeDasharray: 120, strokeDashoffset: 120 });
     gsap.set('.stroke-R', { strokeDasharray: 150, strokeDashoffset: 150 });
     gsap.set('.progress-bar-fill', { scaleX: 0, transformOrigin: 'left' });
     gsap.set('.loader-radial-glow', { scale: 0.5, opacity: 0 });
 
-    // Sequence execution
+    // Timeline sequence matching specifications exactly (STEP 6)
     tl.to('.loader-radial-glow', { scale: 1.2, opacity: 0.25, duration: 0.8, ease: 'power1.out' })
-      .to('.stroke-T', { strokeDashoffset: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
-      .to('.stroke-R', { strokeDashoffset: 0, duration: 0.5, ease: 'power2.out' }, '-=0.3')
+      // T draws at 300ms
+      .to('.stroke-T', { strokeDashoffset: 0, duration: 0.5, ease: 'power2.out' }, 0.3)
+      // R draws at 600ms
+      .to('.stroke-R', { strokeDashoffset: 0, duration: 0.4, ease: 'power2.out' }, 0.6)
+      // Filled with gradient at 900ms
       .to('.monogram-svg', { 
         filter: 'drop-shadow(0 0 25px rgba(0, 212, 255, 0.8))', 
-        duration: 0.3 
-      })
-      .to('.progress-bar-fill', { scaleX: 1, duration: 1.2, ease: 'power2.inOut' }, '-=0.2')
-      .to('.progress-bar-fill', { 
-        boxShadow: '0 0 25px #fbbf24', 
-        backgroundColor: '#fbbf24', 
-        duration: 0.1 
-      })
+        duration: 0.2 
+      }, 0.9)
+      // Progress bar starts at 1000ms, runs for 1.1s to hit 100% at 2100ms
+      .to('.progress-bar-fill', { scaleX: 1, duration: 1.1, ease: 'power1.inOut' }, 1.0)
+      // Explode monogram + clipPath fade screen at 2100ms
       .to('.monogram-wrapper', { 
-        scale: 1.5, 
+        scale: 2.0, 
         opacity: 0, 
-        duration: 0.5, 
+        duration: 0.4, 
         ease: 'power3.in' 
-      }, '+=0.1')
+      }, 2.1)
       .to('.loader-screen', {
         clipPath: 'circle(0% at 50% 50%)',
         duration: 0.8,
         ease: 'power4.inOut'
-      }, '-=0.2')
+      }, 2.1)
       .to('.loader-screen', {
         opacity: 0,
         duration: 0.2
-      });
+      }, '-=0.2');
 
     return () => {
-      clearTimeout(textInterval);
+      clearTimeout(textInterval1);
       clearTimeout(textInterval2);
       tl.kill();
     };
@@ -117,7 +116,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
         </div>
 
         {/* Status text */}
-        <span className="font-mono text-[10px] tracking-[0.2em] text-text-secondary animate-pulse">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-text-secondary">
           {loadingText}
         </span>
       </div>
