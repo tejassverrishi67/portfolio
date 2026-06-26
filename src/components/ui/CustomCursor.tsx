@@ -23,16 +23,24 @@ export const CustomCursor: React.FC = () => {
     const ring = ringRef.current;
     if (!dot || !ring) return;
 
+    const ringInner = ring.querySelector('.custom-cursor-ring-inner');
+
     let mouseX = 0;
     let mouseY = 0;
     let ringX = 0;
     let ringY = 0;
 
+    let hasMoved = false;
+
     // Movement tracking
     const onMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-      gsap.set(dot, { x: mouseX, y: mouseY });
+      gsap.set(dot, { x: mouseX, y: mouseY, xPercent: -50, yPercent: -50 });
+      if (!hasMoved) {
+        hasMoved = true;
+        gsap.to([dot, ring], { opacity: 1, duration: 0.2 });
+      }
     };
 
     // Lerped trailing ring loop
@@ -40,7 +48,7 @@ export const CustomCursor: React.FC = () => {
     const updateRing = () => {
       ringX += (mouseX - ringX) * 0.12; // Lerp 0.12 lag
       ringY += (mouseY - ringY) * 0.12;
-      gsap.set(ring, { x: ringX, y: ringY });
+      gsap.set(ring, { x: ringX, y: ringY, xPercent: -50, yPercent: -50 });
       animFrameId = requestAnimationFrame(updateRing);
     };
 
@@ -49,7 +57,16 @@ export const CustomCursor: React.FC = () => {
 
     // Fade in/out window triggers
     const onMouseLeave = () => gsap.to([dot, ring], { opacity: 0, duration: 0.2 });
-    const onMouseEnter = () => gsap.to([dot, ring], { opacity: 1, duration: 0.2 });
+    const onMouseEnter = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
+      if (mouseEvent.clientX !== undefined) {
+        mouseX = mouseEvent.clientX;
+        mouseY = mouseEvent.clientY;
+      }
+      if (hasMoved) {
+        gsap.to([dot, ring], { opacity: 1, duration: 0.2 });
+      }
+    };
 
     document.addEventListener('mouseleave', onMouseLeave);
     document.addEventListener('mouseenter', onMouseEnter);
@@ -69,6 +86,10 @@ export const CustomCursor: React.FC = () => {
           gsap.to(ring, {
             width: 60,
             height: 60,
+            duration: 0.2,
+            overwrite: 'auto'
+          });
+          gsap.to(ringInner, {
             backgroundColor: 'rgba(124, 58, 237, 0.15)',
             borderColor: '#7c3aed',
             boxShadow: '0 0 20px rgba(124, 58, 237, 0.4)',
@@ -81,6 +102,10 @@ export const CustomCursor: React.FC = () => {
           gsap.to(ring, {
             width: 80,
             height: 80,
+            duration: 0.2,
+            overwrite: 'auto'
+          });
+          gsap.to(ringInner, {
             backgroundColor: 'rgba(0, 212, 255, 0.15)',
             borderColor: '#00d4ff',
             boxShadow: '0 0 20px rgba(0, 212, 255, 0.4)',
@@ -95,6 +120,10 @@ export const CustomCursor: React.FC = () => {
         gsap.to(ring, {
           width: 40,
           height: 40,
+          duration: 0.2,
+          overwrite: 'auto'
+        });
+        gsap.to(ringInner, {
           backgroundColor: 'transparent',
           borderColor: 'rgba(0, 212, 255, 0.4)',
           boxShadow: 'none',
@@ -144,8 +173,9 @@ export const CustomCursor: React.FC = () => {
           border-radius: 50%;
           pointer-events: none;
           z-index: var(--z-cursor);
-          transform: translate(-50%, -50%);
           box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+          opacity: 0;
+          transition: opacity 0.2s ease;
         }
         .custom-cursor-ring {
           position: fixed;
@@ -153,14 +183,20 @@ export const CustomCursor: React.FC = () => {
           left: 0;
           width: 40px;
           height: 40px;
-          border: 1.5px solid rgba(0, 212, 255, 0.4);
-          border-radius: 50%;
           pointer-events: none;
           z-index: var(--z-cursor);
-          transform: translate(-50%, -50%);
           display: flex;
           align-items: center;
           justify-content: center;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        .custom-cursor-ring-inner {
+          position: absolute;
+          inset: 0;
+          border: 1.5px solid rgba(0, 212, 255, 0.4);
+          border-radius: 50%;
+          background-color: transparent;
           animation: ring-slow-rotate 6s linear infinite;
         }
         .custom-cursor-text {
@@ -170,11 +206,12 @@ export const CustomCursor: React.FC = () => {
           color: #ffffff;
           letter-spacing: 0.1em;
           opacity: 0;
+          z-index: 1;
           animation: fade-in-text 0.2s forwards;
         }
         @keyframes ring-slow-rotate {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @keyframes fade-in-text {
           to { opacity: 1; }
@@ -183,6 +220,7 @@ export const CustomCursor: React.FC = () => {
       
       <div ref={dotRef} className="custom-cursor-dot" />
       <div ref={ringRef} className="custom-cursor-ring">
+        <div className="custom-cursor-ring-inner" />
         {cursorText && <span className="custom-cursor-text">{cursorText}</span>}
       </div>
     </>

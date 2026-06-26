@@ -184,7 +184,7 @@ export const Hero: React.FC = () => {
           data-cursor="link"
           className="hero-title-container flex flex-col items-center leading-[0.9] tracking-tighter mb-6"
         >
-          <div ref={title1Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">
+          <div ref={title1Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-text-primary">
             {firstName.map((letter, i) => (
               <span 
                 key={i} 
@@ -195,7 +195,7 @@ export const Hero: React.FC = () => {
               </span>
             ))}
           </div>
-          <div ref={title2Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink">
+          <div ref={title2Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-text-primary">
             {lastName.map((letter, i) => (
               <span 
                 key={i} 
@@ -230,7 +230,14 @@ export const Hero: React.FC = () => {
           </MagneticButton>
           
           <MagneticButton
-            onClick={() => window.open('/resume.pdf')}
+            onClick={() => {
+              const link = document.createElement('a');
+              link.href = '/resume.pdf';
+              link.download = 'Tejassver_Rishi_S_Resume.pdf';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
             data-cursor="link"
             className="w-full sm:w-auto px-8 py-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-text-primary font-display font-medium text-base flex items-center justify-center gap-2 cursor-none transition-all active:scale-95 select-none"
           >

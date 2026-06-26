@@ -144,10 +144,10 @@ export const Awards: React.FC = () => {
                       <div className="flex flex-col">
                         <div className="flex justify-between mb-1">
                           <span>Easy</span>
-                          <span className="text-[#00dd30]"><CounterUp end={80} suffix="+" /></span>
+                          <span className="text-[#00dd30]"><CounterUp end={150} suffix="+" /></span>
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="leetcode-bar-fill h-full bg-[#00dd30] rounded-full" style={{ width: '35%', transformOrigin: 'left' }} />
+                          <div className="leetcode-bar-fill h-full bg-[#00dd30] rounded-full" style={{ width: '60%', transformOrigin: 'left' }} />
                         </div>
                       </div>
 
@@ -155,10 +155,10 @@ export const Awards: React.FC = () => {
                       <div className="flex flex-col">
                         <div className="flex justify-between mb-1">
                           <span>Medium</span>
-                          <span className="text-[#ffb700]"><CounterUp end={150} suffix="+" /></span>
+                          <span className="text-[#ffb700]"><CounterUp end={80} suffix="+" /></span>
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="leetcode-bar-fill h-full bg-[#ffb700] rounded-full" style={{ width: '60%', transformOrigin: 'left' }} />
+                          <div className="leetcode-bar-fill h-full bg-[#ffb700] rounded-full" style={{ width: '32%', transformOrigin: 'left' }} />
                         </div>
                       </div>
 
@@ -169,7 +169,7 @@ export const Awards: React.FC = () => {
                           <span className="text-[#ff2d55]"><CounterUp end={20} suffix="+" /></span>
                         </div>
                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="leetcode-bar-fill h-full bg-[#ff2d55] rounded-full" style={{ width: '10%', transformOrigin: 'left' }} />
+                          <div className="leetcode-bar-fill h-full bg-[#ff2d55] rounded-full" style={{ width: '8%', transformOrigin: 'left' }} />
                         </div>
                       </div>
                     </div>

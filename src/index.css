@@ -170,3 +170,8 @@ body::before {
   animation: disco-flash 0.4s linear infinite;
 }
 
+/* Custom Navigation Bar Layering Fix */
+.z-navbar {
+  z-index: var(--z-navbar);
+}
+

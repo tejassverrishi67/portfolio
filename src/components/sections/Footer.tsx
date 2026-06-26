@@ -70,7 +70,7 @@ Built with: Next.js/Vite, Three.js, GSAP, Lenis & love.`,
               Built with ♥ by Tejassver Rishi S
             </span>
             <span className="text-[10px] text-text-muted">
-              Chennai, Tamil Nadu &bull; 2026
+              Chennai, Tamil Nadu &bull; 2029
             </span>
           </div>
 

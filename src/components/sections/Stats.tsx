@@ -114,9 +114,9 @@ export const Stats: React.FC = () => {
         {/* Grad Year */}
         <div className="pt-8 md:pt-0">
           <StatCol 
-            end={2026} 
+            end={2029} 
             label="Grad" 
-            subLabel="Intern Year" 
+            subLabel="Grad Year" 
             isVisible={isVisible} 
           />
         </div>

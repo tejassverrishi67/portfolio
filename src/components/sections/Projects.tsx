@@ -40,32 +40,8 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
 
   const renderVisualMockup = (id: string) => {
     switch (id) {
-      case 'neuromap': // SVG Animated node network
-        return (
-          <div className="w-full h-full relative flex items-center justify-center bg-bg-void/40 overflow-hidden min-h-[160px]">
-            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.015)_1px,transparent_1px)] [background-size:16px_16px]" />
-            <svg viewBox="0 0 200 100" className="w-[85%] h-[85%] overflow-visible">
-              <line x1="40" y1="50" x2="70" y2="30" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" className="animate-pulse" />
-              <line x1="40" y1="50" x2="80" y2="70" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" />
-              <line x1="70" y1="30" x2="110" y2="35" stroke="rgba(0, 212, 255, 0.4)" strokeWidth="1.5" />
-              <line x1="80" y1="70" x2="120" y2="60" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" />
-              <line x1="110" y1="35" x2="160" y2="50" stroke="rgba(0, 212, 255, 0.4)" strokeWidth="1.5" />
-              <line x1="120" y1="60" x2="160" y2="50" stroke="rgba(124, 58, 237, 0.4)" strokeWidth="1.5" />
-
-              <circle cx="40" cy="50" r="5" fill="#00d4ff" className="animate-ping" style={{ animationDuration: '3s' }} />
-              <circle cx="40" cy="50" r="5" fill="#00d4ff" />
-              
-              <circle cx="70" cy="30" r="4.5" fill="#7c3aed" />
-              <circle cx="80" cy="70" r="4.5" fill="#a855f7" />
-              
-              <circle cx="110" cy="35" r="5.5" fill="#00d4ff" />
-              <circle cx="120" cy="60" r="4" fill="#7c3aed" />
-              
-              <circle cx="160" cy="50" r="6" fill="#f0abfc" className="animate-ping" style={{ animationDuration: '2.5s' }} />
-              <circle cx="160" cy="50" r="6" fill="#f0abfc" />
-            </svg>
-          </div>
-        );
+      case 'neuromap': // Replicated Visual Canvas Mockup
+        return <NeuroMapMockup />;
 
       case 'queue-care': // Live queue counter
         return <QueueCareMockup />;
@@ -156,6 +132,161 @@ const ProjectCard: React.FC<CardProps> = ({ project, isMobile }) => {
               </a>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* NeuroMap Canvas Mockup */
+const NeuroMapMockup: React.FC = () => {
+  return (
+    <div className="w-full h-full min-h-[300px] md:min-h-[340px] flex bg-[#06050c] text-text-primary rounded-t-xl overflow-hidden relative select-none font-mono text-[8px] md:text-[9px]">
+      
+      {/* 1. Left Sidebar */}
+      <div className="hidden sm:flex flex-col w-[110px] h-full bg-[#030206] border-r border-white/5 p-2.5 flex-shrink-0 justify-between z-10">
+        <div className="flex flex-col">
+          {/* Logo */}
+          <div className="flex items-center gap-1.5 text-[9px] font-display font-extrabold text-[#00ff88] mb-5">
+            <span className="text-[12px]">🧠</span>
+            <span>NeuroMap</span>
+          </div>
+          {/* Menu Items */}
+          <div className="flex flex-col gap-1.5 text-text-secondary text-[8px]">
+            <div className="hover:text-text-primary p-1 rounded transition-colors cursor-none">Dashboard</div>
+            <div className="hover:text-text-primary p-1 rounded transition-colors cursor-none">Brain Dump</div>
+            <div className="hover:text-text-primary p-1 rounded transition-colors cursor-none">Eisenhower</div>
+            <div className="bg-[#00ff88]/10 text-[#00ff88] border-l-2 border-[#00ff88] pl-1.5 py-1 rounded-r font-semibold">Visual Canvas</div>
+            <div className="hover:text-text-primary p-1 rounded transition-colors cursor-none">Settings</div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-[7px] text-text-muted">
+          <span>☀️ / 🌙</span>
+          <span>◀</span>
+        </div>
+      </div>
+
+      {/* 2. Main Screen Area */}
+      <div className="flex flex-col flex-grow h-full overflow-hidden z-10">
+        
+        {/* Header Bar */}
+        <div className="flex justify-between items-center h-8 px-3 border-b border-white/5 bg-[#030206] text-[8px] flex-shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-text-secondary hover:text-text-primary cursor-none">←</span>
+            <span className="font-bold text-text-primary">My Career Roadmap</span>
+            <span className="text-text-muted hidden md:inline">| Template Workspace</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 border border-white/10 rounded hover:bg-white/5 transition-colors cursor-none">Export</span>
+            <span className="px-1.5 py-0.5 bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88] rounded shadow-[0_0_8px_rgba(0,255,136,0.2)] cursor-none">Save</span>
+          </div>
+        </div>
+
+        {/* Canvas Workspace */}
+        <div className="relative flex-grow h-full w-full bg-[#06050c] bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:10px_10px] overflow-hidden">
+          
+          {/* SVG Connections (Section 11) */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M 45,25 C 30,25 25,35 22,42" fill="none" stroke="rgba(0, 255, 136, 0.35)" strokeWidth="0.6" className="animate-pulse" />
+            <path d="M 45,25 C 48,32 50,38 55,48" fill="none" stroke="rgba(0, 255, 136, 0.35)" strokeWidth="0.6" />
+            <path d="M 45,25 C 60,25 65,22 72,25" fill="none" stroke="rgba(0, 255, 136, 0.35)" strokeWidth="0.6" />
+            <path d="M 22,58 C 25,68 28,70 33,74" fill="none" stroke="rgba(0, 212, 255, 0.35)" strokeWidth="0.6" />
+            <path d="M 55,62 C 50,70 40,73 33,74" fill="none" stroke="rgba(0, 212, 255, 0.35)" strokeWidth="0.6" />
+          </svg>
+
+          {/* Node 1: GOAL (top-middle) */}
+          <div className="absolute top-[8%] left-[35%] w-[85px] md:w-[110px] border border-[#00ff88]/30 shadow-[0_0_12px_rgba(0,255,136,0.15)] bg-[#0e0b1e]/90 rounded-lg p-1.5 flex flex-col gap-1 z-10">
+            <div className="flex items-center gap-1 text-[6px] md:text-[7px] text-[#00ff88] font-bold">
+              <span>🎯</span> GOAL
+            </div>
+            <div className="font-bold text-[7px] md:text-[8px] text-text-primary leading-tight">SDE 2 at Tier 1 Tech</div>
+            <div className="flex justify-between items-center text-[5px] md:text-[6px] text-text-muted mt-0.5">
+              <span>Progress</span>
+              <span className="text-[#00ff88]">20%</span>
+            </div>
+            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-0.5">
+              <div className="h-full bg-[#00ff88]" style={{ width: '20%' }} />
+            </div>
+          </div>
+
+          {/* Node 2: TASK (left) */}
+          <div className="absolute top-[38%] left-[5%] w-[85px] md:w-[105px] border border-[#00d4ff]/30 shadow-[0_0_12px_rgba(0,212,255,0.15)] bg-[#0e0b1e]/90 rounded-lg p-1.5 flex flex-col gap-1 z-10">
+            <div className="flex items-center gap-1 text-[6px] md:text-[7px] text-[#00d4ff] font-bold">
+              <span>📋</span> TASK
+            </div>
+            <div className="font-bold text-[7px] md:text-[8px] text-text-primary leading-tight">System Design Mastery</div>
+            <p className="text-[5px] md:text-[6px] text-text-secondary leading-tight line-clamp-2">Read Alex Xu's System Design Interview...</p>
+            <div className="flex items-center gap-1 text-[5px] md:text-[6px] text-[#00ff88] mt-0.5 font-semibold">
+              <span>☑</span> In Progress
+            </div>
+          </div>
+
+          {/* Node 3: TASK (middle-right) */}
+          <div className="absolute top-[44%] left-[52%] w-[85px] md:w-[105px] border border-[#00d4ff]/30 shadow-[0_0_12px_rgba(0,212,255,0.15)] bg-[#0e0b1e]/90 rounded-lg p-1.5 flex flex-col gap-1 z-10">
+            <div className="flex items-center gap-1 text-[6px] md:text-[7px] text-[#00d4ff] font-bold">
+              <span>📋</span> TASK
+            </div>
+            <div className="font-bold text-[7px] md:text-[8px] text-text-primary leading-tight">Open Source Contribs</div>
+            <p className="text-[5px] md:text-[6px] text-text-secondary leading-tight line-clamp-2">Find 2 active repos in Next.js...</p>
+            <span className="self-start px-1 py-0.5 rounded bg-[#00d4ff]/10 text-[5px] md:text-[6px] text-[#00d4ff] mt-0.5 font-bold">Medium</span>
+          </div>
+
+          {/* Node 4: DEADLINE (bottom-middle) */}
+          <div className="absolute top-[70%] left-[27%] w-[85px] md:w-[110px] border border-[#fbbf24]/30 shadow-[0_0_12px_rgba(251,191,36,0.15)] bg-[#0e0b1e]/90 rounded-lg p-1.5 flex flex-col gap-1 z-10">
+            <div className="flex items-center gap-1 text-[6px] md:text-[7px] text-[#fbbf24] font-bold">
+              <span>⏰</span> DEADLINE
+            </div>
+            <div className="font-bold text-[7px] md:text-[8px] text-text-primary leading-tight">Portfolio & Resume</div>
+            <p className="text-[5px] md:text-[6px] text-text-muted leading-tight">Refactor site for metrics</p>
+            <span className="self-start px-1 py-0.5 rounded bg-[#fbbf24]/10 text-[5px] md:text-[6px] text-[#fbbf24] mt-0.5 font-bold animate-pulse">90 days left</span>
+          </div>
+
+          {/* Node 5: NOTE (right-middle) */}
+          <div className="absolute top-[20%] left-[70%] w-[85px] md:w-[110px] border border-[#a855f7]/30 shadow-[0_0_12px_rgba(168,85,247,0.15)] bg-[#0e0b1e]/90 rounded-lg p-1.5 flex flex-col gap-1 z-10">
+            <div className="flex items-center gap-1 text-[6px] md:text-[7px] text-[#a855f7] font-bold">
+              <span>📝</span> NOTE
+            </div>
+            <div className="font-bold text-[7px] md:text-[8px] text-text-primary leading-tight">Career Resources Hub</div>
+            <div className="flex gap-1 flex-wrap mt-0.5">
+              <span className="bg-white/5 border border-white/10 px-1 py-0.2 rounded text-[4px] md:text-[5px] text-text-secondary">career</span>
+              <span className="bg-white/5 border border-white/10 px-1 py-0.2 rounded text-[4px] md:text-[5px] text-text-secondary">links</span>
+              <span className="bg-white/5 border border-white/10 px-1 py-0.2 rounded text-[4px] md:text-[5px] text-text-secondary">study</span>
+            </div>
+          </div>
+
+          {/* Canvas Floating Toolbar */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[#0e0b1e]/90 border border-white/10 rounded-full px-2 py-1 z-10 scale-75 sm:scale-90 opacity-90 shadow-md">
+            <div className="flex items-center gap-0.5 text-[#00ff88] border-r border-white/5 pr-1.5 text-[6px] md:text-[7px]"><span className="w-1.5 h-1.5 bg-[#00ff88] rounded-full" /> Goal</div>
+            <div className="flex items-center gap-0.5 text-[#00d4ff] border-r border-white/5 pr-1.5 text-[6px] md:text-[7px]"><span className="w-1.5 h-1.5 bg-[#00d4ff] rounded-full" /> Task</div>
+            <div className="flex items-center gap-0.5 text-[#fbbf24] border-r border-white/5 pr-1.5 text-[6px] md:text-[7px]"><span className="w-1.5 h-1.5 bg-[#fbbf24] rounded-full" /> Date</div>
+            <div className="flex items-center gap-0.5 text-[#a855f7] text-[6px] md:text-[7px]"><span className="w-1.5 h-1.5 bg-[#a855f7] rounded-full" /> Note</div>
+          </div>
+
+          {/* Zoom controls (bottom-left) */}
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-[#0e0b1e]/90 border border-white/10 rounded px-1.5 py-0.5 z-10 scale-75 md:scale-90 text-[7px] text-text-secondary">
+            <span className="hover:text-text-primary cursor-none">+</span>
+            <span className="text-white/10">|</span>
+            <span className="hover:text-text-primary cursor-none">-</span>
+            <span className="text-white/10">|</span>
+            <span className="hover:text-text-primary cursor-none">🔍</span>
+          </div>
+
+          {/* Minimap (bottom-right) */}
+          <div className="absolute bottom-2 right-2 w-14 h-10 bg-[#0e0b1e]/95 border border-white/10 rounded p-1 z-10 scale-75 md:scale-90 flex items-center justify-center">
+            <div className="relative w-full h-full bg-[#06050c]/80 rounded border border-white/5">
+              {/* goal dot */}
+              <div className="absolute top-[8%] left-[35%] w-1 h-1 bg-[#00ff88] rounded-full" />
+              {/* task 1 dot */}
+              <div className="absolute top-[38%] left-[5%] w-1 h-1 bg-[#00d4ff] rounded-full" />
+              {/* task 2 dot */}
+              <div className="absolute top-[44%] left-[52%] w-1 h-1 bg-[#00d4ff] rounded-full" />
+              {/* deadline dot */}
+              <div className="absolute top-[70%] left-[27%] w-1 h-1 bg-[#fbbf24] rounded-full" />
+              {/* note dot */}
+              <div className="absolute top-[20%] left-[70%] w-1 h-1 bg-[#a855f7] rounded-full" />
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
