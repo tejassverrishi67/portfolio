@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════
+   SECTION 3 — DESIGN SYSTEM (THE BIBLE)
+   ═══════════════════════════════════════════════════ */
+
+@theme {
+  /* Fonts */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+
+  /* Colors */
+  --color-bg-void: #03020a;
+  --color-bg-deep: #080614;
+  --color-bg-surface: #0e0b1e;
+  --color-bg-elevated: #14102a;
+
+  --color-neon-blue: #00d4ff;
+  --color-neon-violet: #7c3aed;
+  --color-neon-purple: #a855f7;
+  --color-neon-pink: #f0abfc;
+  --color-neon-gold: #fbbf24;
+  --color-neon-green: #00ff88;
+
+  --color-text-primary: #f8f4ff;
+  --color-text-secondary: #a99ec4;
+  --color-text-muted: #5c5478;
+  --color-text-code: #00ff88;
+}
+
+:root {
+  /* Glows */
+  --glow-blue: 0 0 20px rgba(0, 212, 255, 0.4), 
+                0 0 60px rgba(0, 212, 255, 0.15),
+                0 0 100px rgba(0, 212, 255, 0.05);
+  --glow-violet: 0 0 20px rgba(124, 58, 237, 0.5),
+                 0 0 60px rgba(124, 58, 237, 0.2);
+  --glow-gold: 0 0 30px rgba(251, 191, 36, 0.5),
+                0 0 80px rgba(251, 191, 36, 0.2);
+  --glow-subtle: 0 0 40px rgba(124, 58, 237, 0.1);
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #f0abfc 100%);
+  --gradient-card: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(124,58,237,0.08) 100%);
+  --gradient-text: linear-gradient(90deg, #00d4ff, #a855f7, #f0abfc);
+  --gradient-gold: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+  --gradient-bg: radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.12) 0%, transparent 50%),
+                 radial-gradient(ellipse at 80% 20%, rgba(0,212,255,0.08) 0%, transparent 50%),
+                 radial-gradient(ellipse at 50% 80%, rgba(240,171,252,0.06) 0%, transparent 50%);
+
+  /* Borders */
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(0, 212, 255, 0.3);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-violet: rgba(124, 58, 237, 0.4);
+
+  /* Blurs & Z-index */
+  --blur-glass: 20px;
+  --blur-heavy: 40px;
+
+  --z-background: -10;
+  --z-content: 1;
+  --z-sticky: 10;
+  --z-navbar: 50;
+  --z-cursor: 99;
+  --z-loader: 100;
+}
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--color-bg-deep);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neon-violet) var(--color-bg-void);
+  scroll-behavior: auto; /* Handled by Lenis */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-neon-violet);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-blue);
+}
+
+/* Base Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Background gradient overlays */
+.bg-grain {
+  background-image: var(--gradient-bg);
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -5;
+}
+
+/* Glassmorphism panel base */
+.glass-panel {
+  background: rgba(14, 11, 30, 0.6);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border: 1px solid var(--border-glass);
+  transition: all 400ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  background: rgba(14, 11, 30, 0.8);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), var(--glow-subtle);
+}
+
+/* Text Gradients */
+.text-gradient {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom Cursor default support */
+body {
+  cursor: none;
+}
+a, button, select, input, textarea, [role="button"], .interactive {
+  cursor: none;
+}
+
+/* Hide cursor on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  body, a, button, select, input, textarea, [role="button"], .interactive {
+    cursor: auto !important;
+  }
+}
+
+/* Keyframes */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 3s infinite;
+}
+
+.animate-shimmer-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.12), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 3.5s infinite;
+}
+
+/* Pulse Dot animation */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0px rgba(0, 255, 136, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(0, 255, 136, 0);
+  }
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #00ff88;
+  border-radius: 50%;
+  animation: pulse-ring 1.5s ease infinite;
+}
+
+/* Matrix Falling Code styles (Konami Cheat code) */
+.matrix-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  background: rgba(3, 2, 10, 0.85);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.matrix-active .matrix-canvas {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Responsive utilities */
+.container-custom {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: clamp(20px, 5vw, 80px);
+}
