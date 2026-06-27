@@ -56,12 +56,12 @@ export interface EducationItem {
 }
 
 export const PERSONAL = {
-  name: "Tejassver Rishi S",
+  name: "Tejassver Rishi",
   titleLine1: "Computer Science Engineering Student",
   titleLine2: "Full Stack Developer & AI Builder",
   college: "Chennai Institute of Technology",
   cgpa: "8.52",
-  email: "tejassverrishis.cse2025@citchennai.net",
+  email: "tejassvercodes67@gmail.com",
   phone: "+91-7397355281",
   location: "Chennai, Tamil Nadu, India",
   github: "https://github.com/tejassverrishi67",

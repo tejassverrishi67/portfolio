@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
 Impressive that you're looking under the hood.
 I like you already.
 
-📧 tejassverrishis.cse2025@citchennai.net
+📧 tejassvercodes67@gmail.com
 🔗 github.com/tejassverrishi67
 
 Built with: Next.js/Vite, Three.js, GSAP, Lenis & love.`,
@@ -67,7 +67,7 @@ Built with: Next.js/Vite, Three.js, GSAP, Lenis & love.`,
               TR
             </span>
             <span className="text-xs text-text-secondary">
-              Built with ♥ by Tejassver Rishi S
+              Built with ♥ by Tejassver Rishi
             </span>
             <span className="text-[10px] text-text-muted">
               Chennai, Tamil Nadu &bull; 2029
@@ -109,7 +109,7 @@ Built with: Next.js/Vite, Three.js, GSAP, Lenis & love.`,
         {/* Lower layout: copyright */}
         <div className="text-center">
           <span className="font-mono text-[10px] md:text-[11px] text-text-muted">
-            DESIGNED & DEVELOPED BY TEJASSVER RISHI S
+            DESIGNED & DEVELOPED BY TEJASSVER RISHI
           </span>
         </div>
 

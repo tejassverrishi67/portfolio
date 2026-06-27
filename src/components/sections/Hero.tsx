@@ -17,7 +17,7 @@ export const Hero: React.FC = () => {
   const [showEmoji, setShowEmoji] = useState(false);
 
   const firstName = "TEJASSVER".split("");
-  const lastName = "RISHI S".split("");
+  const lastName = "RISHI".split("");
 
   useEffect(() => {
     // 1. Hide scroll indicator after 100px scroll
@@ -184,7 +184,7 @@ export const Hero: React.FC = () => {
           data-cursor="link"
           className="hero-title-container flex flex-col items-center leading-[0.9] tracking-tighter mb-6"
         >
-          <div ref={title1Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-text-primary">
+          <div ref={title1Ref} className="text-[10vw] sm:text-[8.5vw] md:text-[85px] lg:text-[120px] font-display font-extrabold text-text-primary">
             {firstName.map((letter, i) => (
               <span 
                 key={i} 
@@ -195,7 +195,7 @@ export const Hero: React.FC = () => {
               </span>
             ))}
           </div>
-          <div ref={title2Ref} className="text-[12vw] sm:text-[10vw] md:text-[100px] lg:text-[140px] font-display font-extrabold text-text-primary">
+          <div ref={title2Ref} className="text-[10vw] sm:text-[8.5vw] md:text-[85px] lg:text-[120px] font-display font-extrabold text-text-primary">
             {lastName.map((letter, i) => (
               <span 
                 key={i} 
@@ -233,7 +233,7 @@ export const Hero: React.FC = () => {
             onClick={() => {
               const link = document.createElement('a');
               link.href = '/resume.pdf';
-              link.download = 'Tejassver_Rishi_S_Resume.pdf';
+              link.download = 'Tejassver_Rishi_Resume.pdf';
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);

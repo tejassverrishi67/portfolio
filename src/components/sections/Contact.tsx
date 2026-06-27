@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Mail, Phone, Github, Linkedin, Code, Send } from 'lucide-react';
 import { gsap } from 'gsap';
-import emailjs from '@emailjs/browser';
 import { PERSONAL_INFO } from '../../data/portfolio';
 
 export const Contact: React.FC = () => {
@@ -71,33 +70,35 @@ export const Contact: React.FC = () => {
     setTimeout(() => setShowToast(false), 4000);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formRef.current) return;
 
     setFormStatus('sending');
 
-    // EmailJS Environment keys
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_default';
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_default';
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'public_key';
+    const formData = new FormData(formRef.current);
+    const data = {
+      name: formData.get('user_name'),
+      email: formData.get('user_email'),
+      message: formData.get('message'),
+      _subject: `New Portfolio Message from ${formData.get('user_name')}`,
+      _captcha: 'false',
+    };
 
-    // If template variables are placeholder keys, simulate sending successfully for offline demo
-    if (serviceId === 'service_default' || publicKey === 'public_key') {
-      setTimeout(() => {
-        setFormStatus('success');
-        triggerToast('Message sent successfully! (Demo mode)');
-        formRef.current?.reset();
-        
-        // Reset button state after 3 seconds
-        setTimeout(() => {
-          setFormStatus('idle');
-        }, 3000);
-      }, 2000);
-      return;
-    }
-
-    emailjs.sendForm(serviceId, templateId, formRef.current, publicKey)
+    fetch('https://formsubmit.co/ajax/tejassvercodes67@gmail.com', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Failed to send email');
+      })
       .then(() => {
         setFormStatus('success');
         triggerToast('Thank you! Your message has been sent.');
@@ -108,7 +109,7 @@ export const Contact: React.FC = () => {
         }, 3000);
       })
       .catch((error) => {
-        console.error('EmailJS error:', error);
+        console.error('Email sending error:', error);
         setFormStatus('error');
         triggerToast('Failed to send email. Please try again.');
         
